@@ -81,11 +81,11 @@ def main() -> None:
           if hit else "带 query 的清单：未命中 refund")
 
     # ---------------------------------------------------------------- 事故 3
-    hr("3. 危险操作：DROP TABLE 和 /etc/shadow")
+    hr("3. 危险操作：DROP TABLE 和越界路径")
     for tool, args in [
         ("postgres__execute_sql", {"sql": "DROP TABLE orders"}),
         ("postgres__execute_sql", {"sql": "DELETE FROM orders;"}),
-        ("files__read_file", {"path": "../../etc/shadow"}),
+        ("files__read_file", {"path": "../../config/prod.env"}),
     ]:
         res = gw.invoke(CallRequest(tool=tool, arguments=args))
         print(f"{tool:<22} {str(args):<42} -> {res.error_code}")

@@ -17,7 +17,7 @@ python3 timeline.py        # 一条 trace 走完十道关卡（9 轮 7,803 token
 |---|---|---|
 | 工具重名 | `search` 在 5 个 Server 里重名，模型随机挑一个 | `server__tool` 命名空间 + 冲突策略（拒绝/别名/优先级） |
 | 上下文被吃光 | 94 个工具的清单 1,720 tokens，300 个工具时直接顶破预算 | 预算内裁剪 + Server 索引 + `gw_discover` 两阶段发现 |
-| 危险操作裸奔 | 模型"顺手清理"执行 `DROP TABLE`，读 `../../etc/shadow` | 风险分级 + 参数守卫 + 人工审批（绑定实参指纹） |
+| 危险操作裸奔 | 模型"顺手清理"执行 `DROP TABLE`，读 `../../config/prod.env` | 风险分级 + 参数守卫 + 人工审批（绑定实参指纹） |
 | 单点拖垮全链路 | k8s Server 卡死，共享线程池被打满，其他 11 个也不可用 | 按 Server 熔断 + 半开探针 + 并发闸 + 超时预算 |
 | 返回体过大 | 一次语义检索回 527KB，塞回上下文 | 字段投影 / 长串截断 / 分页句柄 |
 
@@ -48,7 +48,7 @@ resolve → quarantine → validate → policy → approval → idempotency → 
 模型追问 gw_discover(server='billing') -> 展开 6 个工具，只占 119 tokens
 
 postgres__execute_sql  {'sql': 'DROP TABLE orders'}   -> policy_denied
-files__read_file       {'path': '../../etc/shadow'}   -> policy_denied
+files__read_file       {'path': '../../config/prod.env'}   -> policy_denied
 
 扩容 10 副本           -> approval_required，工单 tk_25e6fcbc1b6574de
 拿这张工单去关核心库    -> approval_invalid：实参与审批单不一致（参数指纹不匹配）
@@ -85,7 +85,7 @@ github__search_code      -> ok=True  （k8s 挂了不影响我）
 
 1. **`narrow()` 不能只在最外层过滤**。返回体通常是 `{"total": 40, "items": [{...}]}`，按顶层 key 过滤会把整个结果砍成 `{}`。必须区分「记录」和「容器」。
 2. **审批单要绑参数指纹**。只校验 ticket 有效，等于让模型拿"批准了 A 的工单"去执行 B。
-3. **守卫不能被通配放行绕过**。一条 `allow: *` 的只读规则会顺手放过 `../../etc/shadow`，只有显式 `override_guards=True` 才能越过。
+3. **守卫不能被通配放行绕过**。一条 `allow: *` 的只读规则会顺手放过 `../../config/prod.env`，只有显式 `override_guards=True` 才能越过。
 4. **预算要把 footer 也算进去**。否则会出现"标称 600 token，实际 679"。
 5. **`bool` 是 `int` 的子类**。校验 `integer` 时必须单独排除 `True/False`，否则 `limit=True` 会被放行。
 
