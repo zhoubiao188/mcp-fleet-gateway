@@ -6,6 +6,7 @@
 python3 -m pip install -e ".[dev]"
 python3 -m pytest          # 285 passed
 python3 demo.py            # 12 个 Server / 94 个工具的完整演练
+python3 timeline.py        # 一条 trace 走完十道关卡（9 轮 7,803 tokens）
 ```
 
 ## 它解决什么
@@ -20,7 +21,7 @@ python3 demo.py            # 12 个 Server / 94 个工具的完整演练
 | 单点拖垮全链路 | k8s Server 卡死，共享线程池被打满，其他 11 个也不可用 | 按 Server 熔断 + 半开探针 + 并发闸 + 超时预算 |
 | 返回体过大 | 一次语义检索回 527KB，塞回上下文 | 字段投影 / 长串截断 / 分页句柄 |
 
-## 一次调用的八道关卡
+## 一次调用的十道关卡
 
 ```
 resolve → quarantine → validate → policy → approval → idempotency → admit → call → shape → audit
@@ -78,6 +79,7 @@ github__search_code      -> ok=True  （k8s 挂了不影响我）
 | `audit.py` | 审计与回放 | JSONL sink、按 trace 回放 |
 | `gateway.py` | 编排 | 十道关卡、幂等重放、统一错误码 |
 | `demo_fleet.py` | 12 个假 Server | 假实现，真 schema、真风险等级、真返回体形状 |
+| `timeline.py` | 端到端时间线 | 一次排障任务 9 轮调用，撞上预算/截断/分页/审批/拒绝 |
 
 ## 几个不显眼但要命的细节
 
