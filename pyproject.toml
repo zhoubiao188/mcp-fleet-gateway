@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mcp-fleet-gateway"
+version = "0.1.0"
+description = "MCP Fleet Gateway：把 N 个 MCP Server 收敛成一个可运维入口（命名空间 / 工具预算 / 策略审批 / 熔断隔离 / 结果瘦身 / 审计回放）"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "技术无止境" }]
+keywords = ["mcp", "ai-agent", "llm", "gateway", "tool-calling"]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[tool.setuptools.packages.find]
+include = ["mcp_fleet_gateway*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
